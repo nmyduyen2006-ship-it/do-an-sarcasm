@@ -13,7 +13,7 @@ MAX_LEN = 50
 
 def load_attention_model(model_path="attention_extraction_model.h5", tokenizer_path="tokenizer_final.pkl"):
     """Load model va tokenizer da train san."""
-   model = tf.keras.models.load_model(model_path)
+    model = tf.keras.models.load_model(model_path, compile=False)
     with open(tokenizer_path, "rb") as f:
         tokenizer = pickle.load(f)
     return model, tokenizer
