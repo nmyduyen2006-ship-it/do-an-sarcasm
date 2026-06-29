@@ -1,0 +1,38 @@
+import streamlit as st
+import pandas as pd
+import numpy as np
+from attention_module import load_attention_model, predict_with_attention, render_html_highlight
+
+# Cấu hình trang
+st.set_page_config(page_title="Dashboard Sarcasm", layout="wide")
+st.title("📊 Bảng điều khiển phân loại mỉa mai")
+
+# Load model
+model, tokenizer = load_attention_model("attention_extraction_model.h5")
+
+# Side bar
+menu = st.sidebar.selectbox("Chọn chức năng", ["Dự đoán đơn lẻ", "Phân tích file Excel"])
+
+if menu == "Dự đoán đơn lẻ":
+    text = st.text_area("Nhập bài đánh giá:")
+    if st.button("Phân tích"):
+        res = predict_with_attention(text, tokenizer, model)
+        st.write(f"Kết quả: **{res['prediction']}** (Độ tin cậy: {res['confidence']:.2f})")
+        st.markdown(render_html_highlight(res), unsafe_allow_html=True)
+        
+        # Kiểm tra cảnh báo
+        if any(keyword in text.lower() for keyword in ["hàng giả", "dị ứng"]):
+            st.error("⚠️ CẢNH BÁO: Phát hiện từ khóa nhạy cảm!")
+
+elif menu == "Phân tích file Excel":
+    file = st.file_uploader("Tải file Excel/CSV", type=["csv", "xlsx"])
+    if file:
+        df = pd.read_csv(file) # Giả sử file csv
+        st.write("Đang phân tích...")
+        # (Bạn có thể thêm logic vòng lặp ở đây để xử lý hàng loạt)
+        st.dataframe(df)
+
+# Panel Cảnh báo châm biếm
+st.sidebar.divider()
+st.sidebar.subheader("🚨 Cảnh báo châm biếm")
+st.sidebar.write("Danh sách review nghi vấn (Ví dụ) sẽ hiện ở đây.")
